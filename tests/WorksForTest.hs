@@ -118,6 +118,8 @@ t1 = do
                         , [EN "Albert", EN "Sameer"]
                         , [EN "Albert", EN "Bob"]
                         ]
+
+-- nearly identical to t1
 t2 :: Assertion
 t2 = do
   let Just db = db1
