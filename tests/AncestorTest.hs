@@ -21,14 +21,14 @@ tests = [ testGroup "t1" [ testCase "1" t1
 
 db1 :: Maybe (Database Text)
 db1 = makeDatabase $ do
-      parentOf <- addRelation "parentOf" 2
-      let facts :: [[Text]]
-          facts = [ [ "Bob", "Mary" ]
-                  , [ "Sue", "Mary" ]
-                  , [ "Mary", "John" ]
-                  , [ "Joe", "John" ]
-                  ]
-      mapM_ (assertFact parentOf) facts
+  parentOf <- addRelation "parentOf" 2
+  let facts :: [[Text]]
+      facts = [ [ "Bob", "Mary" ]
+              , [ "Sue", "Mary" ]
+              , [ "Mary", "John" ]
+              , [ "Joe", "John" ]
+              ]
+  mapM_ (assertFact parentOf) facts
 
 t1 :: Assertion
 t1 = do
