@@ -36,6 +36,12 @@ library
                  text,
                  transformers,
                  vector
+
+                 -- jbb-added
+                 , test-framework
+                 , test-framework-hunit
+                 , HUnit
+
   hs-source-dirs: src
   ghc-options: -Wall -auto-all
 

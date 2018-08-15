@@ -18,4 +18,3 @@ instance Hashable Depic where
   hashWithSalt x (DSound d s) = x ##      d ## hash s ## (1 :: Int)
   hashWithSalt x (Seq d e)    = x ## hash d ## hash e ## (2 :: Int)
   hashWithSalt x (Simult d e) = x ## hash d ## hash e ## (3 :: Int)
-
