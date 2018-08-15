@@ -38,12 +38,16 @@ instance Show a => Show (Vect n a) where
 type Label = String
 type Arity = SNat
 
-type Flavor n = (Arity n, Label)
+type Flavor n = (Arity n, Vect ('S ('S n)) String)
+
+ar = (one, "a" >- "b" >- VNil) :: Flavor 'Z
 
 data HypergraphNode where
   Atom :: Label -> HypergraphNode
   RelationshipFlavor :: Flavor n -> HypergraphNode
-  Relationship :: Flavor n -> Vect n HypergraphNode -> HypergraphNode
+  Relationship :: Flavor n -> Vect ('S n) HypergraphNode -> HypergraphNode
 
 foo :: HypergraphNode
-foo = Relationship (SS (SS SZ), "Foo") (VCons (Atom "a") (VCons (Atom "b") VNil))
+foo = Relationship
+      (two, "The" >- "comes before the" >- "" >- VNil)
+      (Atom "a" >- Atom "b" >- VNil)
