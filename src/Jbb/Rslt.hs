@@ -3,11 +3,32 @@
 
 {-# LANGUAGE GADTs, KindSignatures, DataKinds, ScopedTypeVariables #-}
 
+module Jbb.Rslt where
+
+import Data.Hashable
+
+
+infixl 5 ##
+(##) :: Hashable a => Int -> a -> Int
+(##) = hashWithSalt
+
 data Nat = Z | S Nat
+
+instance Hashable Nat where
+  hashWithSalt x nat = x ## hash "Nat" ## go nat where
+    go :: Nat -> Integer
+    go Z = 0
+    go (S x) = 1 + go x
 
 data SNat n where
   SZ :: SNat 'Z
   SS :: SNat n -> SNat ('S n)
+
+instance Hashable (SNat n) where
+  hashWithSalt x snat = x ## "SNat" ## go snat
+    where go :: forall n. SNat n -> Int
+          go SZ = 0
+          go (SS x) = 1 + go x
 
 instance Show (SNat n) where
   show s = "type-level " ++ show (go s) where
@@ -25,6 +46,10 @@ three = SS $ SS SZ
 data Vect (n :: Nat) a where
   VNil  :: Vect 'Z a
   VCons :: a -> Vect n a -> Vect ('S n) a
+
+instance Hashable a => Hashable (Vect n a) where
+  hashWithSalt x (VNil) = x ## "Vect" ## "Nil"
+  hashWithSalt x (a `VCons` b) = x ## a ## "Vect" ## b
 
 infixr 5 >-
 (>-) = VCons
@@ -47,13 +72,18 @@ type Arity = SNat
 -- corresponds to an arity of 1, not 0 (again because Arity = SNat).
 type Flavor n = (Arity n, Vect ('S ('S n)) String)
 
-ar = (one, "a" >- "b" >- VNil) :: Flavor 'Z
-
 data HypergraphNode where
   Atom :: Label -> HypergraphNode
   RelationshipFlavor :: Flavor n -> HypergraphNode
   Relationship :: forall n.
     Flavor n -> Vect ('S n) HypergraphNode -> HypergraphNode
+
+instance Hashable HypergraphNode where
+  hashWithSalt x (Atom s) = x ## "HypergraphNode Atom" ## s
+  hashWithSalt x (RelationshipFlavor (a,b)) =
+    x ## hash "HypergraphNode RelationshipFlavor" ## a ## b
+  hashWithSalt x (Relationship f v) =
+    x ## hash "HypergraphNode Relationship" ## f ## v
 
 bar :: HypergraphNode
 bar = Relationship
