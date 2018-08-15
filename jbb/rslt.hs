@@ -1,13 +1,49 @@
-{-# LANGUAGE GADTs, KindSignatures, DataKinds #-}
+-- | based on
+-- https://www.reddit.com/r/haskell/comments/8tnily/dependent_types_in_constructors_eg_data_x_y_z_y/e191ppc/
 
-import Data.Hashable
-import Database.Datalog
+{-# LANGUAGE GADTs, KindSignatures, DataKinds, ScopedTypeVariables #-}
 
-type Arity = Int
+data Nat = Z | S Nat
 
--- https://www.reddit.com/r/haskell/comments/8tnily/dependent_types_in_constructors_eg_data_x_y_z_y/e18upbc/
-data ExprKind = WordK | TpltK | RelK
-data Expr (a :: ExprKind) where
-  Word :: String -> Expr 'WordK
-  Tplt :: Arity -> [Expr 'WordK] -> Expr 'TpltK
-  Rel :: Expr 'TpltK -> [Expr a] -> Expr 'WordK
+data SNat n where
+  SZ :: SNat 'Z
+  SS :: SNat n -> SNat ('S n)
+
+instance Show (SNat n) where
+  show s = "type-level " ++ show (go s) where
+    go :: forall n. SNat n -> Int
+    go SZ = 1
+    go (SS k) = 1 + go k
+
+one :: SNat 'Z
+one = SZ
+two :: SNat ('S 'Z)
+two = SS SZ
+three :: SNat ('S ('S 'Z))
+three = SS $ SS SZ
+
+data Vect (n :: Nat) a where
+  VNil  :: Vect 'Z a
+  VCons :: a -> Vect n a -> Vect ('S n) a
+
+infixr 5 >-
+(>-) = VCons
+
+instance Show a => Show (Vect n a) where
+  show vec = "<<" ++ go vec ++ ">" where
+    go :: forall m a. Show a => Vect m a -> String
+    go VNil = ""
+    go (a `VCons` vec) = " " ++ show a ++ " >" ++ go vec
+
+type Label = String
+type Arity = SNat
+
+type Flavor n = (Arity n, Label)
+
+data HypergraphNode where
+  Atom :: Label -> HypergraphNode
+  RelationshipFlavor :: Flavor n -> HypergraphNode
+  Relationship :: Flavor n -> Vect n HypergraphNode -> HypergraphNode
+
+foo :: HypergraphNode
+foo = Relationship (SS (SS SZ), "Foo") (VCons (Atom "a") (VCons (Atom "b") VNil))
