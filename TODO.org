@@ -1,4 +1,5 @@
 * TODO next: replace each Vect Node with a Vect ID
+* TODO What's wrong with Hypegraph/NodesInDb.hs?
 * I am not sure of this.
 ** The HypergraphNode can't have those Vect fields.
 *** why
