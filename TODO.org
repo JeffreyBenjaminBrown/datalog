@@ -1,15 +1,17 @@
-* TODO next: replace each Vect Node with a Vect ID
-* TODO What's wrong with Hypegraph/NodesInDb.hs?
-* I am not sure of this.
-** The HypergraphNode can't have those Vect fields.
-*** why
-**** Including the Vect fields means handing the nesting to Haskell's type system.
-**** Querying it using Datalog means handing the nesting to Datalog.
-*** therefore next:
-**** There are still 3 types of node: Atom, Flav, Rel
-**** Each has an ID, so it can be looked up in the "nodes" database.
-**** Look up an Atom, get the associated word or phrase.
-**** Look up a Flav, get the associated list of joints
-***** Use the (length-1) of that list as its arity; seems easier than keeping a separate field and ensuring they match.
-**** Look up a Rel, get nothing (except the fact that it's a Rel).
-
+* TODO next: See if it's okay to use newtypes for labels
+That would let me specify that the label for a Rel2 should be a Lab2.
+* stale: fancy GADT, lengthed vector work
+** TODO next: replace each Vect Node with a Vect ID
+** TODO What's wrong with Hypegraph/NodesInDb.hs?
+** I am not sure of this.
+*** The HypergraphNode can't have those Vect fields.
+**** why
+***** Including the Vect fields means handing the nesting to Haskell's type system.
+***** Querying it using Datalog means handing the nesting to Datalog.
+**** therefore next:
+***** There are still 3 types of node: Atom, Flav, Rel
+***** Each has an ID, so it can be looked up in the "nodes" database.
+***** Look up an Atom, get the associated word or phrase.
+***** Look up a Flav, get the associated list of joints
+****** Use the (length-1) of that list as its arity; seems easier than keeping a separate field and ensuring they match.
+***** Look up a Rel, get nothing (except the fact that it's a Rel).
