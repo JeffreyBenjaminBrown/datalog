@@ -1,5 +1,7 @@
-* TODO next: See if it's okay to use newtypes for labels
+* TODO See if it's okay to use newtypes for labels
 That would let me specify that the label for a Rel2 should be a Lab2.
+* TODO How can I find an ID based on another field?
+e.g. for `data Atom = Atom ID String`, how to find an Atom'd ID based on its String?
 * stale: fancy GADT, lengthed vector work
 ** TODO next: replace each Vect Node with a Vect ID
 ** TODO What's wrong with Hypegraph/NodesInDb.hs?
