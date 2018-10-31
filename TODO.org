@@ -1,3 +1,6 @@
+* TODO Can I compute "(x is a cat) AND (x is not garfield)"?
+I wrote the code (learning/negation.hs); it doesn't run.
+It obeys the laws of Datalog that I understand. (I don't know whether it has a stratification problem, because that law I don't understand.)
 * TODO See if it's okay to use newtypes for labels
 That would let me specify that the label for a Rel2 should be a Lab2.
 * TODO How can I find an ID based on another field?
