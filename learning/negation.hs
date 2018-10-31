@@ -1,3 +1,9 @@
+-- | This is simpler than but exactly parallel to
+-- the first query in tests/WorksForTest.hs
+--
+-- PITFALL: Search for the use of BindVar in WorksForTest
+-- to see how to run more flexible queries.
+
 {-# LANGUAGE OverloadedStrings #-}
 import Database.Datalog
 
@@ -23,7 +29,9 @@ qb = do
   (shouldReturnOdey, [x]) |- [ lit hasFur [x]
                              , negLit hatesRaisins [x]
                              ]
-  issueQuery shouldReturnOdey []
+  issueQuery shouldReturnOdey [x]
+    -- PITFALL: Search for the use of BindVar in WorksForTest
+    -- to see how to run more flexible queries.
 
 qp :: QueryPlan String
 Just qp = buildQueryPlan db qb
