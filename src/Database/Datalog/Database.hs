@@ -28,7 +28,6 @@ import Data.HashMap.Strict ( HashMap )
 import qualified Data.HashMap.Strict as HM
 import Data.HashSet ( HashSet )
 import qualified Data.HashSet as HS
-import Data.Monoid
 import Data.Text ( Text )
 
 import Database.Datalog.Errors
@@ -184,9 +183,11 @@ dataForRelation (Database m) rel =
 
 databaseHasDelta :: Database a -> Bool
 databaseHasDelta (Database db) =
-  any (not . null . relationDelta) (HM.elems db)--  `debug` show (map toDbg (HM.elems db))
+  any (not . null . relationDelta) (HM.elems db)
+  -- `debug` show (map toDbg (HM.elems db))
   -- where
-  --   toDbg r = show (relationName r) ++ ": " ++ show (not (null (relationDelta r)))
+    -- debug = flip Debug.Trace.trace
+    -- toDbg r = show (relationName r) ++ ": " ++ show (not (null (relationDelta r)))
 
 -- | Convert the user-level tuple to a safe length-checked Tuple.
 -- Signals failure (according to @m@) if the length is invalid.

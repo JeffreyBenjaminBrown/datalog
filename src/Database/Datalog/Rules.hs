@@ -45,7 +45,6 @@ import Data.HashMap.Strict ( HashMap )
 import qualified Data.HashMap.Strict as HM
 import Data.List ( intercalate, groupBy, sortBy )
 import Data.Maybe ( mapMaybe )
-import Data.Monoid
 import Data.Text ( Text )
 import qualified Data.Text as T
 import Text.Printf ( printf )
