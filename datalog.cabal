@@ -26,7 +26,7 @@ library
                    Database.Datalog.Errors
                    Database.Datalog.Evaluate
                    Database.Datalog.MagicSets
-                   Database.Datalog.Relation
+                   Database.Datalog.RelationHandle
                    Database.Datalog.Rules
                    Database.Datalog.Stratification
   build-depends: base,

@@ -50,7 +50,7 @@ import qualified Data.Text as T
 import Text.Printf ( printf )
 
 import Database.Datalog.Adornment
-import Database.Datalog.Relation
+import Database.Datalog.RelationHandle
 import Database.Datalog.Errors
 import Database.Datalog.Database
 
@@ -112,7 +112,7 @@ instance (Eq a) => Eq (Term a) where
   FreshVar i1 == FreshVar i2 = i1 == i2
   _ == _ = False
 
-data Clause a = Clause { clauseRelation :: Relation
+data Clause a = Clause { clauseRelation :: RelationHandle
                        , clauseTerms :: [Term a]
                        }
 
@@ -124,7 +124,7 @@ instance (Show a) => Show (Clause a) where
     printf "%s(%s)" (show p) (intercalate ", " (map show ts))
 
 
-data AdornedClause a = AdornedClause { adornedClauseRelation :: Relation
+data AdornedClause a = AdornedClause { adornedClauseRelation :: RelationHandle
                                      , adornedClauseTerms :: [(Term a, Adornment)]
                                      }
 
@@ -169,10 +169,10 @@ instance (Hashable a, Hashable (ctype a)) => Hashable (Literal ctype a) where
   hashWithSalt s (ConditionalClause cid _ ts vm) =
     s `hashWithSalt` cid `hashWithSalt` ts `hashWithSalt` HM.size vm
 
-lit :: (E.MonadThrow m) => Relation -> [Term a] -> QueryBuilder m a (Literal Clause a)
+lit :: (E.MonadThrow m) => RelationHandle -> [Term a] -> QueryBuilder m a (Literal Clause a)
 lit p ts = return $ Literal $ Clause p ts
 
-negLit :: (E.MonadThrow m) => Relation -> [Term a] -> QueryBuilder m a (Literal Clause a)
+negLit :: (E.MonadThrow m) => RelationHandle -> [Term a] -> QueryBuilder m a (Literal Clause a)
 negLit p ts = return $ NegatedLiteral $ Clause p ts
 
 cond1 :: (E.MonadThrow m, Eq a, Hashable a)
@@ -248,7 +248,7 @@ infixr 0 |-
 -- FIXME: Check to make sure that clause arities match their declared
 -- schema.
 (|-), assertRule :: (E.MonadThrow m)
-        => (Relation, [Term a]) -- ^ The rule head
+        => (RelationHandle, [Term a]) -- ^ The rule head
         -> [QueryBuilder m a (Literal Clause a)] -- ^ Body literals
         -> QueryBuilder m a ()
 (|-) = assertRule
@@ -287,13 +287,13 @@ freshenVars l (cs, ixSrc) =
 -- the schema at db construction time.  That also gives an opportunity
 -- to name the columns
 
--- | Retrieve a Relation handle from the IDB.  If the Relation does
+-- | Retrieve a Relation handle from the IDB.  If the RelationHandle does
 -- not exist, an error will be raised.
 relationPredicateFromName :: (E.MonadThrow m)
                              => Text
-                             -> QueryBuilder m a Relation
+                             -> QueryBuilder m a RelationHandle
 relationPredicateFromName name = do
-  let rel = Relation name
+  let rel = RelationHandle name
   idb <- gets intensionalDatabase
   case rel `elem` databaseRelations idb of
     False -> lift $ E.throwM (NoRelationError rel)
@@ -302,8 +302,8 @@ relationPredicateFromName name = do
 -- | Create a new predicate that will be referenced by an EDB rule
 inferencePredicate :: (E.MonadThrow m)
                       => Text
-                      -> QueryBuilder m a Relation
-inferencePredicate = return . Relation
+                      -> QueryBuilder m a RelationHandle
+inferencePredicate = return . RelationHandle
 
 -- | A partial tuple records the atoms in a tuple (with their indices
 -- in the tuple).  These are primarily used in database queries.
@@ -326,19 +326,19 @@ queryToPartialTuple (Query c) =
 
 
 
-literalClauseRelation :: Literal AdornedClause a -> Maybe Relation
+literalClauseRelation :: Literal AdornedClause a -> Maybe RelationHandle
 literalClauseRelation bc =
   case bc of
     Literal c -> Just $ adornedClauseRelation c
     NegatedLiteral c -> Just $ adornedClauseRelation c
     _ -> Nothing
 
-ruleRelations :: Rule a -> [Relation]
+ruleRelations :: Rule a -> [RelationHandle]
 ruleRelations (Rule h bcs _) = adornedClauseRelation h : mapMaybe literalClauseRelation bcs
 
 -- | Turn a Clause into a Query.  This is meant to be the last
 -- statement in a QueryBuilder monad.
-issueQuery :: (E.MonadThrow m) => Relation -> [Term a] -> QueryBuilder m a (Query a)
+issueQuery :: (E.MonadThrow m) => RelationHandle -> [Term a] -> QueryBuilder m a (Query a)
 issueQuery r ts = return $ Query $ Clause r ts
 
 
@@ -361,7 +361,7 @@ partitionRules = groupBy gcmp . sortBy scmp
     scmp = compare `on` (adornedClauseRelation . ruleHead)
     gcmp = (==) `on` (adornedClauseRelation . ruleHead)
 
-queryPredicate :: Query a -> Relation
+queryPredicate :: Query a -> RelationHandle
 queryPredicate = clauseRelation . unQuery
 
 -- | Apply bindings to a query

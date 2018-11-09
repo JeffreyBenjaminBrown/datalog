@@ -135,8 +135,8 @@ applyRule db r = do
     b = ruleBody r
     m = ruleVariableMap r
 
--- | Return True if the given literal references the given Relation
-referencesRelation:: Relation -> Literal AdornedClause a -> Bool
+-- | Return True if the given literal references the given RelationHandle
+referencesRelation:: RelationHandle -> Literal AdornedClause a -> Bool
 referencesRelation hrel rel =
   case rel of
     Literal l -> adornedClauseRelation l == hrel
@@ -147,7 +147,7 @@ referencesRelation hrel rel =
 -- the relation @hr@.
 joinWithDeltaAt :: (Eq a, Hashable a)
                    => Database a
-                   -> Relation
+                   -> RelationHandle
                    -> [Literal AdornedClause a]
                    -> HashMap k v
                    -> [[Bindings s a]]
@@ -217,7 +217,7 @@ parallelTupleWalk _ _ = error "Partial tuple length mismatch"
 scanSpace :: (Eq a)
              => ((Tuple a -> Bool) -> [Tuple a] -> b)
              -> Database a
-             -> Relation
+             -> RelationHandle
              -> PartialTuple a
              -> b
 scanSpace f db p pt = f (tupleMatches pt) space
@@ -237,12 +237,12 @@ scanSpace f db p pt = f (tupleMatches pt) space
 
 -- | Return all of the tuples in the given relation that match the
 -- given PartialTuple
-select :: (Eq a) => Database a -> Relation -> PartialTuple a -> [Tuple a]
+select :: (Eq a) => Database a -> RelationHandle -> PartialTuple a -> [Tuple a]
 select = scanSpace filter
 
 -- | Return true if any tuples in the given relation match the given
 -- 'PartialTuple'
-anyMatch :: (Eq a) => Database a -> Relation -> PartialTuple a -> Bool
+anyMatch :: (Eq a) => Database a -> RelationHandle -> PartialTuple a -> Bool
 anyMatch = scanSpace any
 
 {-# INLINE joinLiteralWith #-}

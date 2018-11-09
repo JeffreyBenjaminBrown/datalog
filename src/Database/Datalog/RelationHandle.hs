@@ -1,5 +1,5 @@
-module Database.Datalog.Relation (
-  Relation(..)
+module Database.Datalog.RelationHandle (
+  RelationHandle(..)
   ) where
 
 import Data.Hashable
@@ -16,12 +16,12 @@ import Database.Datalog.Adornment
 
 -- | A wrapper to expose the relation name to callers without
 -- revealing details of its implementation
-data Relation = Relation Text
+data RelationHandle = RelationHandle Text
               | MagicRelation BindingPattern Text
               deriving (Eq, Ord)
 
-instance Show Relation where
-  show (Relation t) = unpack t
+instance Show RelationHandle where
+  show (RelationHandle t) = unpack t
   show (MagicRelation bs t) = printf "Magic_%s[%s]" (unpack t) (show bs)
 
 -- FIXME: May need a new relation that tracks its binding pattern,
@@ -33,8 +33,8 @@ instance Show Relation where
 -- The transformRules step will have to be the one to do the
 -- translation
 
-instance Hashable Relation where
-  hashWithSalt s (Relation t) =
+instance Hashable RelationHandle where
+  hashWithSalt s (RelationHandle t) =
     s `hashWithSalt` t `hashWithSalt` (99 :: Int)
   hashWithSalt s (MagicRelation p t) =
     s `hashWithSalt` p `hashWithSalt` t `hashWithSalt` (2 :: Int)

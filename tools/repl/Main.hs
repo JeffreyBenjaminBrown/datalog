@@ -197,9 +197,9 @@ toTerm :: C.AnyValue -> Term String
 toTerm (C.AVVariable v) = LogicVar (T.pack v)
 toTerm (C.AVLiteral (C.LVString l)) = Atom l
 
-checkArityDefs :: M.Map String (Relation, Int)
+checkArityDefs :: M.Map String (RelationHandle, Int)
                   -> C.Clause C.AnyValue
-                  -> QueryBuilder ReplM String (M.Map String (Relation, Int))
+                  -> QueryBuilder ReplM String (M.Map String (RelationHandle, Int))
 checkArityDefs defs c@(C.Clause rel vals) = do
   checkArity c
   case M.lookup rel defs of

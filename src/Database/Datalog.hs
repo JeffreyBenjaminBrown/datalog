@@ -1,7 +1,7 @@
 module Database.Datalog (
   -- * Types
   Database,
-  Relation,
+  RelationHandle,
   DatabaseBuilder,
   QueryBuilder,
   Term(LogicVar, BindVar, Anything, Atom),
