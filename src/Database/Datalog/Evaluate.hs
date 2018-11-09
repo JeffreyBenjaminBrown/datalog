@@ -7,7 +7,6 @@ module Database.Datalog.Evaluate (
   select
   ) where
 
-import Control.Applicative
 import qualified Control.Monad.Catch as E
 import Control.Monad ( foldM, liftM )
 import Control.Monad.ST.Strict
@@ -16,7 +15,6 @@ import Data.Hashable
 import Data.HashMap.Strict ( HashMap )
 import qualified Data.HashMap.Strict as HM
 import Data.Maybe ( fromMaybe )
-import Data.Monoid
 import Data.Vector.Mutable ( STVector )
 import qualified Data.Vector.Mutable as V
 

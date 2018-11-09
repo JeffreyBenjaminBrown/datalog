@@ -8,7 +8,6 @@ import Data.HashSet ( HashSet )
 import qualified Data.HashSet as HS
 import Data.IntMap ( IntMap )
 import qualified Data.IntMap as IM
-import Data.Monoid
 import Data.Graph
 
 import Database.Datalog.Database

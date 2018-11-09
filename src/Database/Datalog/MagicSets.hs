@@ -10,7 +10,6 @@ import Data.HashSet ( HashSet )
 import qualified Data.HashSet as HS
 import Data.List ( foldl' )
 import Data.Maybe ( fromMaybe )
-import Data.Monoid
 import Data.Sequence ( Seq, (><), ViewL(..) )
 import qualified Data.Sequence as S
 import Data.Text ( Text )
@@ -21,8 +20,6 @@ import Database.Datalog.Errors
 import Database.Datalog.Relation
 import Database.Datalog.Rules
 
-import Debug.Trace
-debug = flip trace
 
 -- FIXME: All references to negated relations must refer to the
 -- Rel[FFF] relation version because we don't transform those into
@@ -50,7 +47,7 @@ seedDatabase db0 rs (Query (Clause (Relation rname) ts)) bindings = do
         False -> addTupleToRelation' r0 (Tuple (reverse tup))
   return $! replaceRelation db0 r1
   where
-    toTuple acc@(tacc, bacc) t =
+    toTuple (tacc, bacc) t =
       case t of
         Atom a -> return (a : tacc, B : bacc)
         BindVar name ->
@@ -60,6 +57,7 @@ seedDatabase db0 rs (Query (Clause (Relation rname) ts)) bindings = do
         LogicVar _ -> return (tacc, F : bacc)
         FreshVar _ -> return (tacc, F : bacc)
         Anything -> error "Anything should be removed before seedDatabase"
+seedDatabase _ _ _ _ = error "Should this be impossible?" -- TODO ?
 
 definesRelation :: Relation -> Rule a -> Bool
 definesRelation r (Rule ac _ _) = adornedClauseRelation ac == r
@@ -133,7 +131,7 @@ magicSetsRules q rs =
       let hasB = hasBinding bp
           isNeg = HS.member (clauseRelation c) negatedRelations
           bodyBindingPattern = reverse $ snd $ foldl' bindVars (patternToInitialMap bp c, []) lits
-          adornedLits = zip lits bodyBindingPattern
+          -- adornedLits = zip lits bodyBindingPattern
           newDeps = filter isInferred bodyBindingPattern
           newWork = work >< S.fromList newDeps
       case not hasB || isNeg of
@@ -154,7 +152,7 @@ toMagicFilterTable :: (Eq a)
                       => HashSet Relation
                       -> ((Clause a, [Literal Clause a]), [QueryPattern])
                       -> [(Clause a, [Literal Clause a])]
-toMagicFilterTable ps ((c, lits), qps) =
+toMagicFilterTable ps ((_, lits), qps) =
   map (buildMagicFilterRule lits) (filter (isRecPred . fst) body)
   where
     body = zip lits qps
@@ -203,7 +201,7 @@ buildMagicFilterRule lits (lc@(Literal c), qp) =
       Relation relName = clauseRelation c
       h = Clause (MagicRelation (queryPatternBindings qp) relName) retainedTerms
   in (h, retainedLits)
-
+buildMagicFilterRule _ _ = error "Should this be impossible?" -- TODO ?
 
 bindVars :: (Eq a, Hashable a)
             => (HashSet (Term a), [QueryPattern])
