@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 module Database.Datalog.Database (
+  Arity,
   Relation,
   Database,
   DatabaseBuilder,
@@ -33,6 +34,9 @@ import Data.Text ( Text )
 import Database.Datalog.Errors
 import Database.Datalog.Relation
 
+
+type Arity = Int
+
 -- | A wrapper around lists that lets us more easily hide length
 -- checks
 newtype Tuple a = Tuple { unTuple ::  [a] }
@@ -44,17 +48,16 @@ instance (Hashable a) => Hashable (Tuple a) where
 -- | A relation whose elements are fixed-length lists of a
 -- user-defined type.  This is only used internally and is not exposed
 -- to the user.
-data DBRelation a = DBRelation { relationArity :: !Int
+data DBRelation a = DBRelation { relationArity :: !Arity
                                , relationName :: !Relation
                                , relationData :: [Tuple a]
                                , relationMembers :: !(HashSet (Tuple a))
                                , relationDelta :: [Tuple a]
-                               , relationIndex :: !(HashMap (Int, a) (Tuple a))
                                }
                   deriving (Show)
 
 instance (Eq a, Hashable a) => Eq (DBRelation a) where
-  (DBRelation arity1 n1 _ ms1 _ _) == (DBRelation arity2 n2 _ ms2 _ _) =
+  (DBRelation arity1 n1 _ ms1 _) == (DBRelation arity2 n2 _ ms2 _) =
     arity1 == arity2 && n1 == n2 && ms1 == ms2
 
 -- | A database is a collection of facts organized into relations
@@ -80,13 +83,13 @@ makeDatabase b = execStateT b (Database mempty)
 -- error will be raised.  The function returns a 'RelationHandle' that
 -- can be used in conjuction with 'addTuple'.
 addRelation :: (E.MonadThrow m, Eq a, Hashable a)
-               => Text -> Int -> DatabaseBuilder m a Relation
+               => Text -> Arity -> DatabaseBuilder m a Relation
 addRelation name arity = do
   Database m <- get
   case HM.lookup rel m of
     Just _ -> lift $ E.throwM (RelationExistsError name)
     Nothing -> do
-      let r = DBRelation arity rel mempty mempty mempty mempty
+      let r = DBRelation arity rel mempty mempty mempty
       put $! Database $! HM.insert rel r m
       return rel
   where
@@ -154,11 +157,11 @@ resetRelationDelta rel = rel { relationDelta = mempty }
 -- | Get a relation by name.  If it does not exist in the database,
 -- return a new relation with the appropriate arity.
 ensureDatabaseRelation :: (Eq a, Hashable a)
-                          => Database a -> Relation -> Int -> DBRelation a
+                          => Database a -> Relation -> Arity -> DBRelation a
 ensureDatabaseRelation (Database m) rel arity =
   case HM.lookup rel m of
     Just r -> r
-    Nothing -> DBRelation arity rel mempty mempty mempty mempty
+    Nothing -> DBRelation arity rel mempty mempty mempty
 
 -- | Get an existing relation from the database
 databaseRelation :: Database a -> Relation -> DBRelation a
@@ -197,5 +200,5 @@ toWrappedTuple :: (E.MonadThrow m)
                   => DBRelation a -> [a] -> DatabaseBuilder m a (Tuple a)
 toWrappedTuple rel tup =
   case relationArity rel == length tup of
-    False -> lift $ E.throwM (SchemaError (relationName rel))
+    False -> lift $ E.throwM $ SchemaError $ relationName rel
     True -> return $! Tuple tup

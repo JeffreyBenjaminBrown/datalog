@@ -17,9 +17,6 @@ mdb = makeDatabase $ do
   hatesRaisins <- addRelation "hates raisins" 1
   assertFact hatesRaisins ["Garfield"]
 
-db :: Database String
-Just db = mdb
-
 qb :: QueryBuilder Maybe String (Query String)
 qb = do
   hasFur <- relationPredicateFromName "has fur"
@@ -33,8 +30,9 @@ qb = do
     -- PITFALL: Search for the use of BindVar in WorksForTest
     -- to see how to run more flexible queries.
 
-qp :: QueryPlan String
-Just qp = buildQueryPlan db qb
-
 go :: [[[String]]]
-go = executeQueryPlan qp db []
+go = executeQueryPlan qp db [] where
+  db :: Database String
+  Just db = mdb
+  qp :: QueryPlan String
+  Just qp = buildQueryPlan db qb

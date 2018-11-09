@@ -9,6 +9,7 @@ import Test.HUnit hiding ( Test )
 
 import Database.Datalog
 
+
 main :: IO ()
 main = defaultMain tests
 
